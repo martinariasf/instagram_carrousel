@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carousel Studio — Instagram Carousel Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="20" rx="5"/>
+                    <circle cx="12" cy="12" r="4"/>
+                    <circle cx="18" cy="6" r="1.5" fill="currentColor"/>
+                </svg>
+                <h1>Carousel Studio</h1>
+            </div>
+            <p class="tagline">Create stunning Instagram carousels in seconds</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Settings Panel -->
+            <section class="panel settings-panel" id="settingsPanel">
+                <div class="panel-header">
+                    <span class="panel-number">01</span>
+                    <h2>Global Settings</h2>
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label for="slideCount">Number of Slides</label>
+                        <input type="number" id="slideCount" min="1" max="10" value="3">
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="fontFamily">Font Family</label>
+                        <select id="fontFamily">
+                            <option value="Inter">Inter</option>
+                            <option value="Montserrat">Montserrat</option>
+                            <option value="Poppins">Poppins</option>
+                            <option value="Playfair Display">Playfair Display</option>
+                            <option value="Roboto">Roboto</option>
+                            <option value="Oswald">Oswald</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="fontSize">Font Size (px)</label>
+                        <input type="number" id="fontSize" min="12" max="200" value="64">
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="textColor">Text Color</label>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="textColor" value="#ffffff">
+                            <span class="color-value" id="textColorValue">#ffffff</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="textAlign">Text Alignment</label>
+                        <div class="alignment-buttons" id="textAlign">
+                            <button type="button" class="align-btn" data-align="left" title="Left">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="3" y1="6" x2="21" y2="6"/>
+                                    <line x1="3" y1="12" x2="15" y2="12"/>
+                                    <line x1="3" y1="18" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                            <button type="button" class="align-btn active" data-align="center" title="Center">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="3" y1="6" x2="21" y2="6"/>
+                                    <line x1="6" y1="12" x2="18" y2="12"/>
+                                    <line x1="4" y1="18" x2="20" y2="18"/>
+                                </svg>
+                            </button>
+                            <button type="button" class="align-btn" data-align="right" title="Right">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="3" y1="6" x2="21" y2="6"/>
+                                    <line x1="9" y1="12" x2="21" y2="12"/>
+                                    <line x1="6" y1="18" x2="21" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Background Mode</label>
+                        <div class="toggle-buttons" id="backgroundMode">
+                            <button type="button" class="toggle-btn active" data-mode="color">Color</button>
+                            <button type="button" class="toggle-btn" data-mode="image">Image</button>
+                        </div>
+                    </div>
+
+                    <div class="setting-group full-width" id="backgroundColorGroup">
+                        <label for="backgroundColor">Background Color</label>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="backgroundColor" value="#1a1a2e">
+                            <span class="color-value" id="backgroundColorValue">#1a1a2e</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide Content Panel -->
+            <section class="panel slides-panel" id="slidesPanel">
+                <div class="panel-header">
+                    <span class="panel-number">02</span>
+                    <h2>Slide Content</h2>
+                </div>
+                
+                <div class="slides-container" id="slidesContainer">
+                    <!-- Slides will be dynamically generated -->
+                </div>
+            </section>
+
+            <!-- Generate Button -->
+            <div class="generate-section">
+                <button class="btn btn-primary btn-generate" id="generateBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    Generate Carousel
+                </button>
+            </div>
+
+            <!-- Preview Panel -->
+            <section class="panel preview-panel hidden" id="previewPanel">
+                <div class="panel-header">
+                    <span class="panel-number">03</span>
+                    <h2>Preview</h2>
+                </div>
+                
+                <div class="carousel-wrapper">
+                    <div class="carousel-container" id="carouselContainer">
+                        <div class="carousel-track" id="carouselTrack">
+                            <!-- Slides will be inserted here -->
+                        </div>
+                    </div>
+                    
+                    <button class="carousel-nav carousel-nav-prev" id="carouselPrev">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="carousel-nav carousel-nav-next" id="carouselNext">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="carousel-dots" id="carouselDots">
+                        <!-- Dots will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Export Section -->
+                <div class="export-section">
+                    <div class="export-buttons">
+                        <button class="btn btn-secondary" id="downloadAllBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Download All (ZIP)
+                        </button>
+                        <button class="btn btn-instagram" id="postBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="20" rx="5"/>
+                                <circle cx="12" cy="12" r="4"/>
+                                <circle cx="18" cy="6" r="1.5" fill="currentColor"/>
+                            </svg>
+                            Post to Instagram
+                        </button>
+                    </div>
+                    
+                    <div class="individual-downloads" id="individualDownloads">
+                        <!-- Individual download buttons will be inserted here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Made with precision — 1080 × 1350px Instagram-ready images</p>
+        </footer>
+    </div>
+
+    <!-- Hidden canvas container for generation -->
+    <div id="canvasContainer" style="display: none;"></div>
+
+    <!-- Scripts -->
+    <script src="js/canvas.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/carousel.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
