@@ -1,0 +1,206 @@
+{
+  "name": "GF Carousel - AI Text Generator (Agent)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "carousel-text-generator",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "carousel-text-generator"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse incoming data from the carousel app\nconst body = JSON.parse($input.first().json.body);\n\nconst slideCount = body.slideCount || 3;\nconst sources = body.sources || [];\nconst language = body.options?.language || 'en';\n\n// Extract content descriptions and prepare for the agent\nlet contentDescriptions = [];\nlet base64Images = [];\n\nfor (const source of sources) {\n  if (source.type === 'application/pdf') {\n    contentDescriptions.push(`[PDF Document: ${source.name}]`);\n    // For PDFs, we'll pass the base64 data\n    base64Images.push({\n      name: source.name,\n      type: 'pdf',\n      data: source.data\n    });\n  } else if (source.type.startsWith('image/')) {\n    contentDescriptions.push(`[Image: ${source.name}]`);\n    base64Images.push({\n      name: source.name,\n      type: 'image',\n      mimeType: source.type,\n      data: source.data\n    });\n  }\n}\n\n// Build the prompt for the AI Agent\nconst agentPrompt = `You are an expert social media content creator for GF Innovative Solutions, a German technology consultancy.\n\nI need you to analyze the provided content and create Instagram carousel text.\n\n**Content Sources:**\n${contentDescriptions.join('\\n')}\n\n**Requirements:**\n- Create exactly ${slideCount} slides\n- Generate THREE different versions with different tones:\n  1. Professional (formal, corporate, B2B focused)\n  2. Engaging (dynamic, enthusiastic, with occasional emojis)\n  3. Concise (short, punchy, impactful)\n\n**Slide Guidelines:**\n- Each slide: 1-3 sentences max\n- Slide 1: Hook the reader\n- Middle slides: Key information\n- Last slide: Call-to-action\n\n**CRITICAL: Respond with ONLY this JSON structure, no markdown, no explanation:**\n{\n  \"options\": [\n    {\n      \"tone\": \"professional\",\n      \"label\": \"Professional\",\n      \"description\": \"Formal and authoritative tone\",\n      \"slides\": [\n        {\"slideNumber\": 1, \"text\": \"...\"},\n        {\"slideNumber\": 2, \"text\": \"...\"}\n      ]\n    },\n    {\n      \"tone\": \"engaging\",\n      \"label\": \"Engaging\", \n      \"description\": \"Dynamic and captivating tone\",\n      \"slides\": [\n        {\"slideNumber\": 1, \"text\": \"...\"},\n        {\"slideNumber\": 2, \"text\": \"...\"}\n      ]\n    },\n    {\n      \"tone\": \"concise\",\n      \"label\": \"Concise\",\n      \"description\": \"Short and punchy tone\",\n      \"slides\": [\n        {\"slideNumber\": 1, \"text\": \"...\"},\n        {\"slideNumber\": 2, \"text\": \"...\"}\n      ]\n    }\n  ]\n}`;\n\nreturn {\n  json: {\n    slideCount,\n    language,\n    agentPrompt,\n    base64Images,\n    sourcesCount: sources.length,\n    contentDescriptions\n  }\n};"
+      },
+      "id": "parse-input",
+      "name": "Parse Input Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare messages for OpenAI with vision support\nconst input = $input.first().json;\nconst base64Images = input.base64Images || [];\nconst agentPrompt = input.agentPrompt;\n\n// Build content array for GPT-4 Vision\nlet messageContent = [];\n\n// Add images first (GPT-4 Vision format)\nfor (const item of base64Images) {\n  if (item.type === 'image') {\n    messageContent.push({\n      type: 'image_url',\n      image_url: {\n        url: item.data, // Already includes data:image/...;base64,\n        detail: 'high'\n      }\n    });\n  }\n  // Note: For PDFs, GPT-4 Vision doesn't directly support them\n  // You may need to convert PDFs to images first or extract text\n}\n\n// Add the text prompt\nmessageContent.push({\n  type: 'text',\n  text: agentPrompt\n});\n\nreturn {\n  json: {\n    messageContent,\n    hasImages: base64Images.some(img => img.type === 'image'),\n    slideCount: input.slideCount\n  }\n};"
+      },
+      "id": "prepare-agent-input",
+      "name": "Prepare Agent Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.messageContent }}",
+        "hasOutputParser": false,
+        "options": {
+          "systemMessage": "You are an expert social media content creator specializing in Instagram carousels for GF Innovative Solutions, a German technology consultancy company. You analyze news content and create compelling carousel text in three different tones. Always respond with valid JSON only, no markdown formatting or explanations."
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 4096
+        }
+      },
+      "id": "openai-chat-model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [900, 500],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIALS_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the AI Agent's response\nconst response = $input.first().json;\n\nlet outputText = '';\n\n// Extract text from various response formats\nif (response.output) {\n  outputText = response.output;\n} else if (response.text) {\n  outputText = response.text;\n} else if (response.message?.content) {\n  outputText = response.message.content;\n} else if (typeof response === 'string') {\n  outputText = response;\n} else {\n  // Try to find any string property\n  for (const key of Object.keys(response)) {\n    if (typeof response[key] === 'string' && response[key].includes('options')) {\n      outputText = response[key];\n      break;\n    }\n  }\n}\n\n// Clean up the response - remove markdown code blocks if present\noutputText = outputText\n  .replace(/```json\\n?/gi, '')\n  .replace(/```\\n?/g, '')\n  .trim();\n\n// Try to extract JSON if wrapped in other text\nconst jsonMatch = outputText.match(/\\{[\\s\\S]*\"options\"[\\s\\S]*\\}/); \nif (jsonMatch) {\n  outputText = jsonMatch[0];\n}\n\ntry {\n  const parsed = JSON.parse(outputText);\n  \n  // Validate structure\n  if (!parsed.options || !Array.isArray(parsed.options)) {\n    throw new Error('Invalid response: missing options array');\n  }\n  \n  if (parsed.options.length !== 3) {\n    throw new Error(`Invalid response: expected 3 options, got ${parsed.options.length}`);\n  }\n  \n  // Validate each option\n  for (let i = 0; i < parsed.options.length; i++) {\n    const option = parsed.options[i];\n    if (!option.slides || !Array.isArray(option.slides)) {\n      throw new Error(`Option ${i + 1} missing slides array`);\n    }\n    if (!option.tone || !option.label) {\n      throw new Error(`Option ${i + 1} missing tone or label`);\n    }\n  }\n  \n  return {\n    json: parsed\n  };\n  \n} catch (error) {\n  console.error('Parse error:', error.message);\n  console.error('Raw output:', outputText.substring(0, 500));\n  \n  // Return error response\n  return {\n    json: {\n      error: true,\n      message: `Failed to parse AI response: ${error.message}`,\n      rawResponse: outputText.substring(0, 1000)\n    }\n  };\n}"
+      },
+      "id": "parse-response",
+      "name": "Parse Agent Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Input Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Input Data": {
+      "main": [
+        [
+          {
+            "node": "Prepare Agent Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Agent Input": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Agent Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Agent Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "gf-carousel-generator-agent"
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "id": "1",
+      "name": "GF Innovative Solutions"
+    },
+    {
+      "id": "2",
+      "name": "AI Agent"
+    },
+    {
+      "id": "3",
+      "name": "Instagram"
+    },
+    {
+      "id": "4",
+      "name": "OpenAI"
+    }
+  ]
+}
