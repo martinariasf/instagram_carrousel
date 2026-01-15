@@ -3,22 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carousel Studio — Instagram Carousel Generator</title>
+    <title>Carousel Studio — GF Innovative Solutions</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
-            <div class="logo">
-                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="2" width="20" height="20" rx="5"/>
-                    <circle cx="12" cy="12" r="4"/>
-                    <circle cx="18" cy="6" r="1.5" fill="currentColor"/>
-                </svg>
-                <h1>Carousel Studio</h1>
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <span class="logo-text">GF</span>
+                    </div>
+                    <div class="logo-title">
+                        <h1>Carousel Studio</h1>
+                        <span class="logo-subtitle">by GF Innovative Solutions</span>
+                    </div>
+                </div>
+                <button class="config-btn" id="configBtn" title="Settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                    </svg>
+                </button>
             </div>
-            <p class="tagline">Create stunning Instagram carousels in seconds</p>
+            <p class="tagline">Create stunning Instagram carousels with AI-powered content generation</p>
         </header>
 
         <!-- Main Content -->
@@ -39,8 +48,8 @@
                     <div class="setting-group">
                         <label for="fontFamily">Font Family</label>
                         <select id="fontFamily">
+                            <option value="Montserrat" selected>Montserrat</option>
                             <option value="Inter">Inter</option>
-                            <option value="Montserrat">Montserrat</option>
                             <option value="Poppins">Poppins</option>
                             <option value="Playfair Display">Playfair Display</option>
                             <option value="Roboto">Roboto</option>
@@ -99,8 +108,115 @@
                     <div class="setting-group full-width" id="backgroundColorGroup">
                         <label for="backgroundColor">Background Color</label>
                         <div class="color-input-wrapper">
-                            <input type="color" id="backgroundColor" value="#1a1a2e">
-                            <span class="color-value" id="backgroundColorValue">#1a1a2e</span>
+                            <input type="color" id="backgroundColor" value="#211D58">
+                            <span class="color-value" id="backgroundColorValue">#211D58</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Content Generation Panel -->
+            <section class="panel ai-panel" id="aiPanel">
+                <div class="panel-header">
+                    <span class="panel-number">02</span>
+                    <h2>AI Content Generation</h2>
+                    <span class="panel-badge">Powered by Claude</span>
+                </div>
+
+                <div class="ai-description">
+                    <p>Upload PDFs or images containing your news content. Our AI will analyze them and generate three different text variations for your carousel slides.</p>
+                </div>
+
+                <!-- Source Upload Area -->
+                <div class="source-upload-section">
+                    <label class="section-label">Source Content</label>
+                    <div class="source-upload-area" id="sourceUploadArea">
+                        <div class="upload-placeholder" id="sourcePlaceholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="12" y1="18" x2="12" y2="12"/>
+                                <line x1="9" y1="15" x2="15" y2="15"/>
+                            </svg>
+                            <span>Drop PDFs or images here, or click to browse</span>
+                            <span class="upload-hint">Supports: PDF, PNG, JPG, JPEG, WebP</span>
+                        </div>
+                        <input type="file" id="sourceFileInput" multiple accept=".pdf,image/*">
+                    </div>
+
+                    <!-- Uploaded Files List -->
+                    <div class="uploaded-files" id="uploadedFilesList">
+                        <!-- Files will be listed here -->
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <div class="ai-generate-section">
+                    <button class="btn btn-secondary btn-generate-ai" id="generateAiBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2a10 10 0 1010 10H12V2z"/>
+                            <path d="M12 2a10 10 0 00-10 10h10V2z" opacity="0.3"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        Generate Text Options
+                    </button>
+                    <p class="ai-status" id="aiStatus"></p>
+                </div>
+
+                <!-- AI Results Section -->
+                <div class="ai-results hidden" id="aiResults">
+                    <label class="section-label">Choose a Text Style</label>
+                    
+                    <div class="ai-options" id="aiOptions">
+                        <!-- Option A: Professional -->
+                        <div class="ai-option" data-option="0">
+                            <div class="option-header">
+                                <span class="option-badge professional">A</span>
+                                <div class="option-info">
+                                    <h4>Professional</h4>
+                                    <p>Formal and authoritative tone</p>
+                                </div>
+                            </div>
+                            <div class="option-preview" id="optionPreview0">
+                                <!-- Preview text will be inserted here -->
+                            </div>
+                            <button class="btn btn-primary btn-use-option" data-option="0">
+                                Use This Option
+                            </button>
+                        </div>
+
+                        <!-- Option B: Engaging -->
+                        <div class="ai-option" data-option="1">
+                            <div class="option-header">
+                                <span class="option-badge engaging">B</span>
+                                <div class="option-info">
+                                    <h4>Engaging</h4>
+                                    <p>Dynamic and captivating tone</p>
+                                </div>
+                            </div>
+                            <div class="option-preview" id="optionPreview1">
+                                <!-- Preview text will be inserted here -->
+                            </div>
+                            <button class="btn btn-primary btn-use-option" data-option="1">
+                                Use This Option
+                            </button>
+                        </div>
+
+                        <!-- Option C: Concise -->
+                        <div class="ai-option" data-option="2">
+                            <div class="option-header">
+                                <span class="option-badge concise">C</span>
+                                <div class="option-info">
+                                    <h4>Concise</h4>
+                                    <p>Short and punchy tone</p>
+                                </div>
+                            </div>
+                            <div class="option-preview" id="optionPreview2">
+                                <!-- Preview text will be inserted here -->
+                            </div>
+                            <button class="btn btn-primary btn-use-option" data-option="2">
+                                Use This Option
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -109,7 +225,7 @@
             <!-- Slide Content Panel -->
             <section class="panel slides-panel" id="slidesPanel">
                 <div class="panel-header">
-                    <span class="panel-number">02</span>
+                    <span class="panel-number">03</span>
                     <h2>Slide Content</h2>
                 </div>
                 
@@ -131,7 +247,7 @@
             <!-- Preview Panel -->
             <section class="panel preview-panel hidden" id="previewPanel">
                 <div class="panel-header">
-                    <span class="panel-number">03</span>
+                    <span class="panel-number">04</span>
                     <h2>Preview</h2>
                 </div>
                 
@@ -189,8 +305,40 @@
 
         <!-- Footer -->
         <footer class="app-footer">
-            <p>Made with precision — 1080 × 1350px Instagram-ready images</p>
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="footer-logo">GF</span>
+                    <span>GF Innovative Solutions</span>
+                </div>
+                <p>Made with German precision — 1080 × 1350px Instagram-ready images</p>
+            </div>
         </footer>
+    </div>
+
+    <!-- Configuration Modal -->
+    <div class="modal-overlay hidden" id="configModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Configuration</h3>
+                <button class="modal-close" id="configModalClose">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="config-group">
+                    <label for="webhookUrl">AI Webhook URL</label>
+                    <input type="url" id="webhookUrl" placeholder="https://your-n8n-instance.com/webhook/...">
+                    <p class="config-hint">Enter your n8n webhook URL for AI text generation</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="configModalCancel">Cancel</button>
+                <button class="btn btn-primary" id="configModalSave">Save Configuration</button>
+            </div>
+        </div>
     </div>
 
     <!-- Hidden canvas container for generation -->
@@ -200,6 +348,7 @@
     <script src="js/canvas.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/carousel.js"></script>
+    <script src="js/ai-generator.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

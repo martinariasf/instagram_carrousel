@@ -28,14 +28,33 @@ const UIModule = (function() {
             
             // Panels
             settingsPanel: document.getElementById('settingsPanel'),
+            aiPanel: document.getElementById('aiPanel'),
             slidesPanel: document.getElementById('slidesPanel'),
             slidesContainer: document.getElementById('slidesContainer'),
             previewPanel: document.getElementById('previewPanel'),
+            
+            // AI Section
+            sourceUploadArea: document.getElementById('sourceUploadArea'),
+            sourceFileInput: document.getElementById('sourceFileInput'),
+            sourcePlaceholder: document.getElementById('sourcePlaceholder'),
+            uploadedFilesList: document.getElementById('uploadedFilesList'),
+            generateAiBtn: document.getElementById('generateAiBtn'),
+            aiStatus: document.getElementById('aiStatus'),
+            aiResults: document.getElementById('aiResults'),
+            aiOptions: document.getElementById('aiOptions'),
             
             // Buttons
             generateBtn: document.getElementById('generateBtn'),
             downloadAllBtn: document.getElementById('downloadAllBtn'),
             postBtn: document.getElementById('postBtn'),
+            configBtn: document.getElementById('configBtn'),
+            
+            // Configuration Modal
+            configModal: document.getElementById('configModal'),
+            configModalClose: document.getElementById('configModalClose'),
+            configModalCancel: document.getElementById('configModalCancel'),
+            configModalSave: document.getElementById('configModalSave'),
+            webhookUrl: document.getElementById('webhookUrl'),
             
             // Carousel
             carouselContainer: document.getElementById('carouselContainer'),
@@ -195,13 +214,11 @@ const UIModule = (function() {
 
         if (!file) return;
 
-        // Validate file type
         if (!file.type.startsWith('image/')) {
             alert('Please select a valid image file.');
             return;
         }
 
-        // Read and display the image
         const reader = new FileReader();
         reader.onload = (e) => {
             const dataUrl = e.target.result;
@@ -212,9 +229,6 @@ const UIModule = (function() {
 
     /**
      * Display image preview in the upload area
-     * @param {HTMLElement} uploadArea
-     * @param {string} dataUrl
-     * @param {number} slideIndex
      */
     function displayImagePreview(uploadArea, dataUrl, slideIndex) {
         uploadArea.classList.add('has-image');
@@ -229,7 +243,6 @@ const UIModule = (function() {
             <input type="file" accept="image/*" class="slide-image-input" data-slide="${slideIndex}">
         `;
 
-        // Re-attach listeners
         const newInput = uploadArea.querySelector('.slide-image-input');
         newInput.addEventListener('change', handleImageUpload);
 
@@ -243,8 +256,6 @@ const UIModule = (function() {
 
     /**
      * Remove image preview from upload area
-     * @param {HTMLElement} uploadArea
-     * @param {number} slideIndex
      */
     function removeImagePreview(uploadArea, slideIndex) {
         uploadArea.classList.remove('has-image');
@@ -266,8 +277,6 @@ const UIModule = (function() {
 
     /**
      * Update color value display
-     * @param {HTMLInputElement} colorInput
-     * @param {HTMLElement} valueDisplay
      */
     function updateColorValue(colorInput, valueDisplay) {
         valueDisplay.textContent = colorInput.value;
@@ -305,7 +314,6 @@ const UIModule = (function() {
                     elements.backgroundColorGroup.classList.add('hidden');
                 }
 
-                // Re-render slide inputs when mode changes
                 renderSlideInputs();
             });
         });
@@ -337,13 +345,203 @@ const UIModule = (function() {
     }
 
     /**
+     * Set up configuration modal
+     */
+    function setupConfigModal() {
+        elements.configBtn.addEventListener('click', () => {
+            elements.webhookUrl.value = AIGeneratorModule.getWebhookUrl();
+            elements.configModal.classList.remove('hidden');
+        });
+
+        elements.configModalClose.addEventListener('click', () => {
+            elements.configModal.classList.add('hidden');
+        });
+
+        elements.configModalCancel.addEventListener('click', () => {
+            elements.configModal.classList.add('hidden');
+        });
+
+        elements.configModalSave.addEventListener('click', () => {
+            const url = elements.webhookUrl.value.trim();
+            AIGeneratorModule.setWebhookUrl(url);
+            elements.configModal.classList.add('hidden');
+            showAiStatus('Configuration saved successfully!', 'success');
+            setTimeout(clearAiStatus, 3000);
+        });
+
+        elements.configModal.addEventListener('click', (e) => {
+            if (e.target === elements.configModal) {
+                elements.configModal.classList.add('hidden');
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !elements.configModal.classList.contains('hidden')) {
+                elements.configModal.classList.add('hidden');
+            }
+        });
+    }
+
+    /**
+     * Set up source file upload handlers
+     */
+    function setupSourceFileUpload(onFileAdded, onFileRemoved) {
+        // Drag and drop
+        elements.sourceUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            elements.sourceUploadArea.classList.add('drag-over');
+        });
+
+        elements.sourceUploadArea.addEventListener('dragleave', () => {
+            elements.sourceUploadArea.classList.remove('drag-over');
+        });
+
+        elements.sourceUploadArea.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            elements.sourceUploadArea.classList.remove('drag-over');
+            
+            const files = Array.from(e.dataTransfer.files);
+            for (const file of files) {
+                if (isValidSourceFile(file)) {
+                    await onFileAdded(file);
+                }
+            }
+        });
+
+        // File input
+        elements.sourceFileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            for (const file of files) {
+                if (isValidSourceFile(file)) {
+                    await onFileAdded(file);
+                }
+            }
+            e.target.value = '';
+        });
+
+        // File removal (delegated)
+        elements.uploadedFilesList.addEventListener('click', (e) => {
+            const removeBtn = e.target.closest('.remove-file');
+            if (removeBtn) {
+                const fileId = removeBtn.dataset.fileId;
+                onFileRemoved(fileId);
+            }
+        });
+    }
+
+    /**
+     * Check if file is valid source file
+     */
+    function isValidSourceFile(file) {
+        const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+        return validTypes.includes(file.type) || file.type.startsWith('image/');
+    }
+
+    /**
+     * Render uploaded files list
+     */
+    function renderUploadedFiles(files) {
+        if (files.length === 0) {
+            elements.uploadedFilesList.innerHTML = '';
+            return;
+        }
+
+        const html = files.map(file => `
+            <div class="uploaded-file" data-file-id="${file.id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    ${file.type === 'application/pdf' 
+                        ? '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>'
+                        : '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'
+                    }
+                </svg>
+                <span class="file-name">${file.name}</span>
+                <button class="remove-file" data-file-id="${file.id}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        `).join('');
+
+        elements.uploadedFilesList.innerHTML = html;
+    }
+
+    /**
+     * Show AI status message
+     */
+    function showAiStatus(message, type = 'info') {
+        elements.aiStatus.textContent = message;
+        elements.aiStatus.className = 'ai-status';
+        if (type === 'error') {
+            elements.aiStatus.classList.add('error');
+        } else if (type === 'success') {
+            elements.aiStatus.classList.add('success');
+        }
+    }
+
+    /**
+     * Clear AI status
+     */
+    function clearAiStatus() {
+        elements.aiStatus.textContent = '';
+        elements.aiStatus.className = 'ai-status';
+    }
+
+    /**
+     * Render AI options
+     */
+    function renderAiOptions(options) {
+        elements.aiResults.classList.remove('hidden');
+
+        options.forEach((option, index) => {
+            const previewEl = document.getElementById(`optionPreview${index}`);
+            if (previewEl) {
+                const slidesHtml = option.slides.map(slide => `
+                    <div class="slide-preview">
+                        <div class="slide-label">Slide ${slide.slideNumber}</div>
+                        <div class="slide-text">${slide.text}</div>
+                    </div>
+                `).join('');
+                previewEl.innerHTML = slidesHtml;
+            }
+        });
+    }
+
+    /**
+     * Hide AI results
+     */
+    function hideAiResults() {
+        elements.aiResults.classList.add('hidden');
+    }
+
+    /**
+     * Apply selected option to slide inputs
+     */
+    function applyOptionToSlides(option) {
+        const textareas = elements.slidesContainer.querySelectorAll('.slide-text');
+        
+        option.slides.forEach((slide, index) => {
+            if (textareas[index]) {
+                textareas[index].value = slide.text;
+            }
+        });
+
+        // Scroll to slides panel
+        elements.slidesPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Show success message
+        showAiStatus('Text applied to slides! You can edit them before generating.', 'success');
+        setTimeout(clearAiStatus, 4000);
+    }
+
+    /**
      * Show the preview panel with generated images
-     * @param {string[]} images - Array of data URLs
      */
     function showPreview(images) {
         elements.previewPanel.classList.remove('hidden');
         
-        // Smooth scroll to preview
         setTimeout(() => {
             elements.previewPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
@@ -351,7 +549,6 @@ const UIModule = (function() {
 
     /**
      * Render carousel slides
-     * @param {string[]} images - Array of data URLs
      */
     function renderCarouselSlides(images) {
         let slidesHTML = '';
@@ -367,8 +564,6 @@ const UIModule = (function() {
 
     /**
      * Render carousel dots
-     * @param {number} count
-     * @param {number} activeIndex
      */
     function renderCarouselDots(count, activeIndex = 0) {
         let dotsHTML = '';
@@ -382,7 +577,6 @@ const UIModule = (function() {
 
     /**
      * Update active carousel dot
-     * @param {number} activeIndex
      */
     function updateCarouselDots(activeIndex) {
         const dots = elements.carouselDots.querySelectorAll('.carousel-dot');
@@ -393,7 +587,6 @@ const UIModule = (function() {
 
     /**
      * Render individual download buttons
-     * @param {string[]} images - Array of data URLs
      */
     function renderDownloadButtons(images) {
         let buttonsHTML = '';
@@ -414,8 +607,6 @@ const UIModule = (function() {
 
     /**
      * Set button loading state
-     * @param {HTMLButtonElement} button
-     * @param {boolean} loading
      */
     function setButtonLoading(button, loading) {
         if (loading) {
@@ -429,13 +620,30 @@ const UIModule = (function() {
 
     /**
      * Initialize all UI event listeners
-     * @param {Object} callbacks
      */
     function initEventListeners(callbacks) {
-        // Generate button
+        // Generate carousel button
         elements.generateBtn.addEventListener('click', () => {
             if (callbacks.onGenerate) {
                 callbacks.onGenerate();
+            }
+        });
+
+        // Generate AI text button
+        elements.generateAiBtn.addEventListener('click', () => {
+            if (callbacks.onGenerateAi) {
+                callbacks.onGenerateAi();
+            }
+        });
+
+        // Use option buttons
+        elements.aiOptions.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-use-option');
+            if (btn) {
+                const optionIndex = parseInt(btn.dataset.option, 10);
+                if (callbacks.onUseOption) {
+                    callbacks.onUseOption(optionIndex);
+                }
             }
         });
 
@@ -490,7 +698,6 @@ const UIModule = (function() {
 
     /**
      * Initialize the UI module
-     * @param {Object} callbacks
      */
     function init(callbacks) {
         cacheElements();
@@ -498,8 +705,15 @@ const UIModule = (function() {
         setupBackgroundModeToggle();
         setupSlideCountHandler();
         setupColorInputs();
+        setupConfigModal();
         renderSlideInputs();
         initEventListeners(callbacks);
+
+        // Setup source file upload with callbacks
+        setupSourceFileUpload(
+            callbacks.onSourceFileAdded,
+            callbacks.onSourceFileRemoved
+        );
     }
 
     // Public API
@@ -509,6 +723,12 @@ const UIModule = (function() {
         getGlobalSettings,
         getSlidesData,
         renderSlideInputs,
+        renderUploadedFiles,
+        showAiStatus,
+        clearAiStatus,
+        renderAiOptions,
+        hideAiResults,
+        applyOptionToSlides,
         showPreview,
         renderCarouselSlides,
         renderCarouselDots,

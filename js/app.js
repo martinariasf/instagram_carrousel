@@ -13,6 +13,75 @@ const App = (function() {
     };
 
     /**
+     * Handle source file added
+     * @param {File} file
+     */
+    async function handleSourceFileAdded(file) {
+        try {
+            await AIGeneratorModule.addSourceFile(file);
+            UIModule.renderUploadedFiles(AIGeneratorModule.getSourceFiles());
+        } catch (error) {
+            console.error('Error adding file:', error);
+            UIModule.showAiStatus('Failed to add file: ' + error.message, 'error');
+        }
+    }
+
+    /**
+     * Handle source file removed
+     * @param {string} fileId
+     */
+    function handleSourceFileRemoved(fileId) {
+        AIGeneratorModule.removeSourceFile(fileId);
+        UIModule.renderUploadedFiles(AIGeneratorModule.getSourceFiles());
+    }
+
+    /**
+     * Handle AI text generation
+     */
+    async function handleGenerateAi() {
+        const generateAiBtn = document.getElementById('generateAiBtn');
+        const settings = UIModule.getGlobalSettings();
+        
+        try {
+            UIModule.setButtonLoading(generateAiBtn, true);
+            UIModule.showAiStatus('Generating text options...', 'info');
+            UIModule.hideAiResults();
+
+            const result = await AIGeneratorModule.generateTextOptions(settings.slideCount);
+            
+            UIModule.renderAiOptions(result.options);
+            UIModule.showAiStatus('Generated 3 text options. Choose one below!', 'success');
+
+        } catch (error) {
+            console.error('Error generating AI text:', error);
+            UIModule.showAiStatus(error.message, 'error');
+
+            // If webhook fails, offer mock data for testing
+            if (error.message.includes('Webhook URL not configured') || error.message.includes('fetch')) {
+                const useMock = confirm('Webhook not available. Would you like to use sample text for testing?');
+                if (useMock) {
+                    const mockResult = AIGeneratorModule.createMockResponse(settings.slideCount);
+                    UIModule.renderAiOptions(mockResult.options);
+                    UIModule.showAiStatus('Using sample text for testing. Configure webhook for real AI generation.', 'success');
+                }
+            }
+        } finally {
+            UIModule.setButtonLoading(generateAiBtn, false);
+        }
+    }
+
+    /**
+     * Handle option selection
+     * @param {number} optionIndex
+     */
+    function handleUseOption(optionIndex) {
+        const option = AIGeneratorModule.getOption(optionIndex);
+        if (option) {
+            UIModule.applyOptionToSlides(option);
+        }
+    }
+
+    /**
      * Handle generate carousel button click
      */
     async function handleGenerate() {
@@ -120,7 +189,7 @@ const App = (function() {
         if (index < 0 || index >= state.generatedImages.length) return;
         
         const dataUrl = state.generatedImages[index];
-        const filename = `carousel-slide-${index + 1}.png`;
+        const filename = `gf-carousel-slide-${index + 1}.png`;
         
         CanvasModule.downloadImage(dataUrl, filename);
     }
@@ -149,17 +218,21 @@ const App = (function() {
      * Initialize the application
      */
     function init() {
-        console.log('Initializing Carousel Studio...');
+        console.log('Initializing GF Carousel Studio...');
 
         // Initialize UI with callbacks
         UIModule.init({
             onGenerate: handleGenerate,
+            onGenerateAi: handleGenerateAi,
+            onUseOption: handleUseOption,
             onDownloadAll: handleDownloadAll,
             onDownloadSingle: handleDownloadSingle,
             onPost: handlePost,
             onCarouselPrev: handleCarouselPrev,
             onCarouselNext: handleCarouselNext,
-            onCarouselDotClick: handleCarouselDotClick
+            onCarouselDotClick: handleCarouselDotClick,
+            onSourceFileAdded: handleSourceFileAdded,
+            onSourceFileRemoved: handleSourceFileRemoved
         });
 
         // Initialize Carousel
@@ -171,7 +244,13 @@ const App = (function() {
             onSlideChange: handleSlideChange
         });
 
-        console.log('Carousel Studio initialized successfully!');
+        // Load existing webhook configuration
+        const webhookUrl = AIGeneratorModule.getWebhookUrl();
+        if (!webhookUrl) {
+            console.log('No webhook URL configured. Click the settings icon to configure.');
+        }
+
+        console.log('GF Carousel Studio initialized successfully!');
     }
 
     // Initialize when DOM is ready
