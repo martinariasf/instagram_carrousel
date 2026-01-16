@@ -1,241 +1,170 @@
 /**
- * App Module
- * Main application orchestrator - ties all modules together
+ * App Module - Main orchestrator with logo support
  */
-
 const App = (function() {
     'use strict';
+    let state = { generatedImages: [], isGenerating: false, currentAiImageSlide: null };
 
-    // Application state
-    let state = {
-        generatedImages: [],
-        isGenerating: false
-    };
-
-    /**
-     * Handle source file added
-     * @param {File} file
-     */
     async function handleSourceFileAdded(file) {
         try {
             await AIGeneratorModule.addSourceFile(file);
             UIModule.renderUploadedFiles(AIGeneratorModule.getSourceFiles());
-        } catch (error) {
-            console.error('Error adding file:', error);
-            UIModule.showAiStatus('Failed to add file: ' + error.message, 'error');
+        } catch (e) {
+            UIModule.showToast('Failed to add file: ' + e.message, 'error');
         }
     }
 
-    /**
-     * Handle source file removed
-     * @param {string} fileId
-     */
     function handleSourceFileRemoved(fileId) {
         AIGeneratorModule.removeSourceFile(fileId);
         UIModule.renderUploadedFiles(AIGeneratorModule.getSourceFiles());
     }
 
-    /**
-     * Handle AI text generation
-     */
-    async function handleGenerateAi() {
-        const generateAiBtn = document.getElementById('generateAiBtn');
+    async function handleGenerateText() {
+        const btn = document.getElementById('generateTextBtn');
         const settings = UIModule.getGlobalSettings();
-        
         try {
-            UIModule.setButtonLoading(generateAiBtn, true);
-            UIModule.showAiStatus('Generating text options...', 'info');
-            UIModule.hideAiResults();
-
+            UIModule.setButtonLoading(btn, true);
+            UIModule.setAiStatus('Generating text options...', true);
+            UIModule.hideTextOptions();
             const result = await AIGeneratorModule.generateTextOptions(settings.slideCount);
-            
-            UIModule.renderAiOptions(result.options);
-            UIModule.showAiStatus('Generated 3 text options. Choose one below!', 'success');
-
-        } catch (error) {
-            console.error('Error generating AI text:', error);
-            UIModule.showAiStatus(error.message, 'error');
-
-            // If webhook fails, offer mock data for testing
-            if (error.message.includes('Webhook URL not configured') || error.message.includes('fetch')) {
-                const useMock = confirm('Webhook not available. Would you like to use sample text for testing?');
-                if (useMock) {
-                    const mockResult = AIGeneratorModule.createMockResponse(settings.slideCount);
-                    UIModule.renderAiOptions(mockResult.options);
-                    UIModule.showAiStatus('Using sample text for testing. Configure webhook for real AI generation.', 'success');
+            UIModule.renderTextOptions(result.options);
+            UIModule.setAiStatus('Choose a style below', false);
+        } catch (e) {
+            UIModule.setAiStatus(e.message, false);
+            if (e.message.includes('not configured') || e.message.includes('fetch')) {
+                if (confirm('Webhook unavailable. Use sample text for testing?')) {
+                    const mock = AIGeneratorModule.createMockTextResponse(settings.slideCount);
+                    UIModule.renderTextOptions(mock.options);
+                    UIModule.setAiStatus('Using sample text', false);
                 }
             }
         } finally {
-            UIModule.setButtonLoading(generateAiBtn, false);
+            UIModule.setButtonLoading(btn, false);
         }
     }
 
-    /**
-     * Handle option selection
-     * @param {number} optionIndex
-     */
-    function handleUseOption(optionIndex) {
-        const option = AIGeneratorModule.getOption(optionIndex);
-        if (option) {
-            UIModule.applyOptionToSlides(option);
+    function handleUseTextOption(index) {
+        const option = AIGeneratorModule.getTextOption(index);
+        if (option) UIModule.applyTextToSlides(option);
+    }
+
+    async function handleGenerateAiImage(slideIndex) {
+        state.currentAiImageSlide = slideIndex;
+        UIModule.showAiImageModal(slideIndex);
+        const slides = UIModule.getSlidesData();
+        const slideText = slides[slideIndex]?.text || '';
+        try {
+            const result = await AIGeneratorModule.generateImagesForSlide(slideIndex, slideText);
+            UIModule.setAiImageOptions(result.images);
+        } catch (e) {
+            if (e.message.includes('not configured')) {
+                const mock = AIGeneratorModule.createMockImageResponse(slideIndex);
+                UIModule.setAiImageOptions(mock.images);
+            } else {
+                UIModule.showToast('Image generation failed: ' + e.message, 'error');
+                UIModule.hideAiImageModal();
+            }
         }
     }
 
-    /**
-     * Handle generate carousel button click
-     */
-    async function handleGenerate() {
+    function handleSelectAiImage(imageData) {
+        if (state.currentAiImageSlide !== null) {
+            UIModule.setSlideImage(state.currentAiImageSlide, imageData);
+            UIModule.showToast('Image applied to slide!', 'success');
+        }
+    }
+
+    async function handleGenerateCarousel() {
         if (state.isGenerating) return;
-
-        const generateBtn = document.getElementById('generateBtn');
-        
+        const btn = document.getElementById('generateCarouselBtn');
         try {
             state.isGenerating = true;
-            UIModule.setButtonLoading(generateBtn, true);
-
-            // Get settings and slide data
-            const globalSettings = UIModule.getGlobalSettings();
-            const slidesData = UIModule.getSlidesData();
-
-            // Validate
-            if (slidesData.length === 0) {
-                alert('Please add at least one slide.');
-                return;
-            }
-
-            // Check if any slide has text
-            const hasContent = slidesData.some(slide => slide.text.trim() !== '');
-            if (!hasContent && globalSettings.backgroundMode === 'color') {
-                const proceed = confirm('All slides are empty. Generate anyway?');
-                if (!proceed) return;
-            }
-
-            // Generate images
-            console.log('Generating carousel with settings:', globalSettings);
-            console.log('Slides data:', slidesData);
-
-            state.generatedImages = await CanvasModule.generateAllSlides(slidesData, globalSettings);
-
-            console.log(`Generated ${state.generatedImages.length} images`);
-
-            // Update UI
-            displayCarousel(state.generatedImages);
-
-        } catch (error) {
-            console.error('Error generating carousel:', error);
-            alert('An error occurred while generating the carousel. Please try again.');
+            UIModule.setButtonLoading(btn, true);
+            const settings = UIModule.getGlobalSettings();
+            const slides = UIModule.getSlidesData();
+            const logoSettings = UIModule.getLogoSettings();
+            state.generatedImages = await CanvasModule.generateAllSlides(slides, settings, logoSettings);
+            UIModule.renderCarouselSlides(state.generatedImages);
+            UIModule.renderCarouselDots(state.generatedImages.length, 0);
+            UIModule.renderDownloadButtons(state.generatedImages);
+            CarouselModule.setTotalSlides(state.generatedImages.length);
+            UIModule.showToast('Carousel generated!', 'success');
+        } catch (e) {
+            UIModule.showToast('Generation failed: ' + e.message, 'error');
         } finally {
             state.isGenerating = false;
-            UIModule.setButtonLoading(generateBtn, false);
+            UIModule.setButtonLoading(btn, false);
         }
     }
 
-    /**
-     * Display the generated carousel in the preview panel
-     * @param {string[]} images
-     */
-    function displayCarousel(images) {
-        // Render carousel slides
-        UIModule.renderCarouselSlides(images);
-        
-        // Render dots
-        UIModule.renderCarouselDots(images.length, 0);
-        
-        // Render download buttons
-        UIModule.renderDownloadButtons(images);
-        
-        // Show preview panel
-        UIModule.showPreview(images);
-        
-        // Initialize carousel with new slides
-        CarouselModule.setTotalSlides(images.length);
-    }
+    function handleCarouselPrev() { CarouselModule.prevSlide(); }
+    function handleCarouselNext() { CarouselModule.nextSlide(); }
+    function handleCarouselDotClick(index) { CarouselModule.goToSlide(index); }
+    function handleSlideChange(index) { UIModule.updateCarouselDots(index); }
 
-    /**
-     * Handle carousel previous button click
-     */
-    function handleCarouselPrev() {
-        CarouselModule.prevSlide();
-    }
-
-    /**
-     * Handle carousel next button click
-     */
-    function handleCarouselNext() {
-        CarouselModule.nextSlide();
-    }
-
-    /**
-     * Handle carousel dot click
-     * @param {number} index
-     */
-    function handleCarouselDotClick(index) {
-        CarouselModule.goToSlide(index);
-    }
-
-    /**
-     * Handle carousel slide change
-     * @param {number} index
-     */
-    function handleSlideChange(index) {
-        UIModule.updateCarouselDots(index);
-    }
-
-    /**
-     * Handle download single image
-     * @param {number} index
-     */
     function handleDownloadSingle(index) {
-        if (index < 0 || index >= state.generatedImages.length) return;
-        
-        const dataUrl = state.generatedImages[index];
-        const filename = `gf-carousel-slide-${index + 1}.png`;
-        
-        CanvasModule.downloadImage(dataUrl, filename);
+        if (index >= 0 && index < state.generatedImages.length) {
+            CanvasModule.downloadImage(state.generatedImages[index], `gf-carousel-slide-${index + 1}.png`);
+        }
     }
 
-    /**
-     * Handle download all images
-     */
     function handleDownloadAll() {
         if (state.generatedImages.length === 0) {
-            alert('No images to download. Please generate the carousel first.');
+            UIModule.showToast('Generate carousel first', 'error');
             return;
         }
-
-        // Download all images with a slight delay between each
         CanvasModule.downloadAllIndividually(state.generatedImages, 500);
+        UIModule.showToast('Downloading all slides...', 'success');
     }
 
-    /**
-     * Handle post to Instagram button click
-     */
-    function handlePost() {
-        alert('Instagram API not connected. Export images to post manually.');
+    async function handlePostNow() {
+        if (state.generatedImages.length === 0) {
+            UIModule.showToast('Generate carousel first', 'error');
+            return;
+        }
+        try {
+            await AIGeneratorModule.postNow({ images: state.generatedImages });
+            UIModule.showToast('Posted successfully!', 'success');
+        } catch (e) {
+            UIModule.showToast(e.message, 'error');
+        }
     }
 
-    /**
-     * Initialize the application
-     */
+    function handleSchedulePost() {
+        if (state.generatedImages.length === 0) {
+            UIModule.showToast('Generate carousel first', 'error');
+            return;
+        }
+        UIModule.showScheduleModal();
+    }
+
+    async function handleConfirmSchedule(data) {
+        try {
+            await AIGeneratorModule.schedulePost({ images: state.generatedImages, scheduledTime: data.scheduledTime, caption: data.caption });
+            UIModule.showToast('Post scheduled!', 'success');
+        } catch (e) {
+            UIModule.showToast(e.message, 'error');
+        }
+    }
+
     function init() {
-        console.log('Initializing GF Carousel Studio...');
-
-        // Initialize UI with callbacks
         UIModule.init({
-            onGenerate: handleGenerate,
-            onGenerateAi: handleGenerateAi,
-            onUseOption: handleUseOption,
-            onDownloadAll: handleDownloadAll,
-            onDownloadSingle: handleDownloadSingle,
-            onPost: handlePost,
+            onSourceFileAdded: handleSourceFileAdded,
+            onSourceFileRemoved: handleSourceFileRemoved,
+            onGenerateText: handleGenerateText,
+            onUseTextOption: handleUseTextOption,
+            onGenerateAiImage: handleGenerateAiImage,
+            onSelectAiImage: handleSelectAiImage,
+            onGenerateCarousel: handleGenerateCarousel,
             onCarouselPrev: handleCarouselPrev,
             onCarouselNext: handleCarouselNext,
             onCarouselDotClick: handleCarouselDotClick,
-            onSourceFileAdded: handleSourceFileAdded,
-            onSourceFileRemoved: handleSourceFileRemoved
+            onDownloadSingle: handleDownloadSingle,
+            onDownloadAll: handleDownloadAll,
+            onPostNow: handlePostNow,
+            onSchedulePost: handleSchedulePost,
+            onConfirmSchedule: handleConfirmSchedule
         });
-
-        // Initialize Carousel
         CarouselModule.init({
             container: document.getElementById('carouselContainer'),
             track: document.getElementById('carouselTrack'),
@@ -243,26 +172,12 @@ const App = (function() {
             nextBtn: document.getElementById('carouselNext'),
             onSlideChange: handleSlideChange
         });
-
-        // Load existing webhook configuration
-        const webhookUrl = AIGeneratorModule.getWebhookUrl();
-        if (!webhookUrl) {
-            console.log('No webhook URL configured. Click the settings icon to configure.');
-        }
-
-        console.log('GF Carousel Studio initialized successfully!');
+        UIModule.renderCarouselSlides([]);
+        console.log('GF Carousel Studio v4 initialized');
     }
 
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
 
-    // Public API
-    return {
-        getState: () => ({ ...state }),
-        regenerate: handleGenerate
-    };
+    return { getState: () => ({...state}) };
 })();

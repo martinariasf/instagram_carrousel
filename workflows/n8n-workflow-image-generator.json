@@ -1,0 +1,101 @@
+{
+  "name": "GF Carousel - AI Image Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "carousel-image-generator",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nlet body = input.body || input;\nif (typeof body === 'string') body = JSON.parse(body);\n\nconst slideIndex = body.slideIndex || 0;\nconst slideText = body.slideText || '';\nconst context = body.context || '';\n\nlet basePrompt = `Professional Instagram carousel background image for tech consultancy. Portrait 4:5 ratio. Modern, clean, corporate. NO TEXT in image.`;\n\nif (slideText) basePrompt += ` Complements message: \"${slideText}\"`;\n\nreturn {\n  json: {\n    slideIndex,\n    prompts: [\n      basePrompt + ' Style: Abstract geometric gradient blues/greens',\n      basePrompt + ' Style: Soft bokeh lights tech atmosphere',\n      basePrompt + ' Style: Minimalist patterns professional colors'\n    ]\n  }\n};"
+      },
+      "id": "build-prompts",
+      "name": "Build Prompts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "generate",
+        "prompt": "={{ $json.prompts[0] }}",
+        "options": { "size": "1024x1024" }
+      },
+      "id": "imagen-1",
+      "name": "Generate Image 1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [680, 180],
+      "credentials": { "openAiApi": { "id": "YOUR_CREDENTIALS", "name": "OpenAI" } }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "generate", 
+        "prompt": "={{ $json.prompts[1] }}",
+        "options": { "size": "1024x1024" }
+      },
+      "id": "imagen-2",
+      "name": "Generate Image 2",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": { "openAiApi": { "id": "YOUR_CREDENTIALS", "name": "OpenAI" } }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "generate",
+        "prompt": "={{ $json.prompts[2] }}",
+        "options": { "size": "1024x1024" }
+      },
+      "id": "imagen-3",
+      "name": "Generate Image 3",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [680, 420],
+      "credentials": { "openAiApi": { "id": "YOUR_CREDENTIALS", "name": "OpenAI" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst images = items.map(item => {\n  if (item.json.data?.[0]?.b64_json) return `data:image/png;base64,${item.json.data[0].b64_json}`;\n  if (item.json.data?.[0]?.url) return item.json.data[0].url;\n  if (item.json.url) return item.json.url;\n  return null;\n}).filter(Boolean);\n\nwhile (images.length < 3) images.push(images[0] || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDgwIiBoZWlnaHQ9IjEzNTAiPjxyZWN0IGZpbGw9IiMyMTFENTgiIHdpZHRoPSIxMDgwIiBoZWlnaHQ9IjEzNTAiLz48L3N2Zz4=');\n\nreturn { json: { images: images.slice(0, 3) } };"
+      },
+      "id": "combine",
+      "name": "Combine Images",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }] } }
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "Build Prompts", "type": "main", "index": 0 }]] },
+    "Build Prompts": { "main": [[{ "node": "Generate Image 1", "type": "main", "index": 0 }, { "node": "Generate Image 2", "type": "main", "index": 0 }, { "node": "Generate Image 3", "type": "main", "index": 0 }]] },
+    "Generate Image 1": { "main": [[{ "node": "Combine Images", "type": "main", "index": 0 }]] },
+    "Generate Image 2": { "main": [[{ "node": "Combine Images", "type": "main", "index": 0 }]] },
+    "Generate Image 3": { "main": [[{ "node": "Combine Images", "type": "main", "index": 0 }]] },
+    "Combine Images": { "main": [[{ "node": "Respond", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

@@ -7,348 +7,195 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-content">
+    <div class="app-layout">
+        <!-- Fixed Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
                 <div class="logo">
-                    <div class="logo-icon">
-                        <span class="logo-text">GF</span>
-                    </div>
-                    <div class="logo-title">
-                        <h1>Carousel Studio</h1>
-                        <span class="logo-subtitle">by GF Innovative Solutions</span>
+                    <div class="logo-icon"><span>GF</span></div>
+                    <div class="logo-text">
+                        <span class="logo-title">Carousel Studio</span>
+                        <span class="logo-subtitle">GF Innovative Solutions</span>
                     </div>
                 </div>
-                <button class="config-btn" id="configBtn" title="Settings">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-                    </svg>
-                </button>
             </div>
-            <p class="tagline">Create stunning Instagram carousels with AI-powered content generation</p>
-        </header>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#settings" class="nav-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>Global Settings</span></a></li>
+                    <li class="nav-item"><a href="#ai-content" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1010 10H12V2z"/><circle cx="12" cy="12" r="3"/></svg><span>AI Content</span></a></li>
+                    <li class="nav-item"><a href="#slides" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>Slides</span></a></li>
+                    <li class="nav-item"><a href="#preview" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Preview & Export</span></a></li>
+                    <li class="nav-item"><a href="#about" class="nav-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>About Us</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="config-btn" id="openConfigBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Configuration</span></button>
+            </div>
+        </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Settings Panel -->
-            <section class="panel settings-panel" id="settingsPanel">
-                <div class="panel-header">
-                    <span class="panel-number">01</span>
-                    <h2>Global Settings</h2>
-                </div>
-                
+        <!-- Main Scrollable Content -->
+        <main class="main-content" id="mainContent">
+            <header class="mobile-header">
+                <button class="menu-toggle" id="menuToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+                <span class="mobile-title">Carousel Studio</span>
+                <button class="mobile-config-btn" id="mobileConfigBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+            </header>
+
+            <section class="hero-section">
+                <h1>Create Stunning Instagram Carousels</h1>
+                <p>AI-powered content generation with professional design tools</p>
+            </section>
+
+            <!-- Settings -->
+            <section class="content-section" id="settings">
+                <div class="section-header"><span class="section-number">01</span><div><h2>Global Settings</h2><p>Configure typography and default styles</p></div></div>
                 <div class="settings-grid">
-                    <div class="setting-group">
-                        <label for="slideCount">Number of Slides</label>
-                        <input type="number" id="slideCount" min="1" max="10" value="3">
-                    </div>
-
-                    <div class="setting-group">
-                        <label for="fontFamily">Font Family</label>
-                        <select id="fontFamily">
-                            <option value="Montserrat" selected>Montserrat</option>
-                            <option value="Inter">Inter</option>
-                            <option value="Poppins">Poppins</option>
-                            <option value="Playfair Display">Playfair Display</option>
-                            <option value="Roboto">Roboto</option>
-                            <option value="Oswald">Oswald</option>
-                        </select>
-                    </div>
-
-                    <div class="setting-group">
-                        <label for="fontSize">Font Size (px)</label>
-                        <input type="number" id="fontSize" min="12" max="200" value="64">
-                    </div>
-
-                    <div class="setting-group">
-                        <label for="textColor">Text Color</label>
-                        <div class="color-input-wrapper">
-                            <input type="color" id="textColor" value="#ffffff">
-                            <span class="color-value" id="textColorValue">#ffffff</span>
+                    <div class="setting-card"><label>Number of Slides</label><div class="input-with-controls"><button class="input-control" id="slidesDecrease">−</button><input type="number" id="slideCount" min="1" max="10" value="3"><button class="input-control" id="slidesIncrease">+</button></div></div>
+                    <div class="setting-card"><label>Font Family</label><select id="fontFamily"><option value="Montserrat" selected>Montserrat</option><option value="Inter">Inter</option><option value="Poppins">Poppins</option><option value="Playfair Display">Playfair Display</option><option value="Roboto">Roboto</option><option value="Oswald">Oswald</option></select></div>
+                    <div class="setting-card"><label>Font Size</label><div class="slider-input"><input type="range" id="fontSizeRange" min="24" max="120" value="64"><div class="slider-value"><input type="number" id="fontSize" min="24" max="120" value="64"><span>px</span></div></div></div>
+                    <div class="setting-card"><label>Text Color</label><div class="color-picker"><input type="color" id="textColor" value="#ffffff"><input type="text" id="textColorHex" value="#ffffff" maxlength="7"></div></div>
+                    <div class="setting-card"><label>Text Alignment</label><div class="button-group" id="textAlign"><button class="btn-icon" data-align="left" title="Left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg></button><button class="btn-icon active" data-align="center" title="Center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button><button class="btn-icon" data-align="right" title="Right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg></button></div></div>
+                    <div class="setting-card"><label>Default Background</label><div class="color-picker"><input type="color" id="backgroundColor" value="#211D58"><input type="text" id="backgroundColorHex" value="#211D58" maxlength="7"></div></div>
+                </div>
+                <div class="logo-settings-card">
+                    <div class="logo-settings-header"><h3>Logo Overlay</h3><label class="toggle-switch"><input type="checkbox" id="logoEnabled"><span class="toggle-slider"></span></label></div>
+                    <div class="logo-settings-content hidden" id="logoSettingsContent">
+                        <div class="logo-upload-area" id="logoUploadArea">
+                            <div class="upload-placeholder" id="logoPlaceholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Upload your logo</span></div>
+                            <img id="logoPreview" class="logo-preview hidden" alt="Logo preview">
+                            <input type="file" id="logoFileInput" accept="image/*">
                         </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <label for="textAlign">Text Alignment</label>
-                        <div class="alignment-buttons" id="textAlign">
-                            <button type="button" class="align-btn" data-align="left" title="Left">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="3" y1="6" x2="21" y2="6"/>
-                                    <line x1="3" y1="12" x2="15" y2="12"/>
-                                    <line x1="3" y1="18" x2="18" y2="18"/>
-                                </svg>
-                            </button>
-                            <button type="button" class="align-btn active" data-align="center" title="Center">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="3" y1="6" x2="21" y2="6"/>
-                                    <line x1="6" y1="12" x2="18" y2="12"/>
-                                    <line x1="4" y1="18" x2="20" y2="18"/>
-                                </svg>
-                            </button>
-                            <button type="button" class="align-btn" data-align="right" title="Right">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="3" y1="6" x2="21" y2="6"/>
-                                    <line x1="9" y1="12" x2="21" y2="12"/>
-                                    <line x1="6" y1="18" x2="21" y2="18"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <label>Background Mode</label>
-                        <div class="toggle-buttons" id="backgroundMode">
-                            <button type="button" class="toggle-btn active" data-mode="color">Color</button>
-                            <button type="button" class="toggle-btn" data-mode="image">Image</button>
-                        </div>
-                    </div>
-
-                    <div class="setting-group full-width" id="backgroundColorGroup">
-                        <label for="backgroundColor">Background Color</label>
-                        <div class="color-input-wrapper">
-                            <input type="color" id="backgroundColor" value="#211D58">
-                            <span class="color-value" id="backgroundColorValue">#211D58</span>
+                        <div class="logo-options">
+                            <div class="logo-option-group"><label>Position</label><div class="position-grid" id="logoPosition"><button class="position-btn" data-position="top-left">↖</button><button class="position-btn" data-position="top-right">↗</button><button class="position-btn active" data-position="bottom-left">↙</button><button class="position-btn" data-position="bottom-right">↘</button></div></div>
+                            <div class="logo-option-group"><label>Size</label><div class="slider-input"><input type="range" id="logoSizeRange" min="30" max="200" value="80"><div class="slider-value"><input type="number" id="logoSize" min="30" max="200" value="80"><span>px</span></div></div></div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- AI Content Generation Panel -->
-            <section class="panel ai-panel" id="aiPanel">
-                <div class="panel-header">
-                    <span class="panel-number">02</span>
-                    <h2>AI Content Generation</h2>
-                    <span class="panel-badge">Powered by Claude</span>
+            <!-- AI Content -->
+            <section class="content-section" id="ai-content">
+                <div class="section-header"><span class="section-number">02</span><div><h2>AI Content Generation</h2><p>Upload source content and let AI create your carousel text</p></div></div>
+                <div class="ai-upload-zone" id="aiUploadZone">
+                    <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                    <h3>Drop your files here</h3><p>or click to browse</p><span class="upload-formats">PDF, PNG, JPG, WebP</span>
+                    <input type="file" id="sourceFileInput" multiple accept=".pdf,image/*">
                 </div>
-
-                <div class="ai-description">
-                    <p>Upload PDFs or images containing your news content. Our AI will analyze them and generate three different text variations for your carousel slides.</p>
-                </div>
-
-                <!-- Source Upload Area -->
-                <div class="source-upload-section">
-                    <label class="section-label">Source Content</label>
-                    <div class="source-upload-area" id="sourceUploadArea">
-                        <div class="upload-placeholder" id="sourcePlaceholder">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                <polyline points="14 2 14 8 20 8"/>
-                                <line x1="12" y1="18" x2="12" y2="12"/>
-                                <line x1="9" y1="15" x2="15" y2="15"/>
-                            </svg>
-                            <span>Drop PDFs or images here, or click to browse</span>
-                            <span class="upload-hint">Supports: PDF, PNG, JPG, JPEG, WebP</span>
-                        </div>
-                        <input type="file" id="sourceFileInput" multiple accept=".pdf,image/*">
-                    </div>
-
-                    <!-- Uploaded Files List -->
-                    <div class="uploaded-files" id="uploadedFilesList">
-                        <!-- Files will be listed here -->
-                    </div>
-                </div>
-
-                <!-- Generate Button -->
-                <div class="ai-generate-section">
-                    <button class="btn btn-secondary btn-generate-ai" id="generateAiBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2a10 10 0 1010 10H12V2z"/>
-                            <path d="M12 2a10 10 0 00-10 10h10V2z" opacity="0.3"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        Generate Text Options
-                    </button>
-                    <p class="ai-status" id="aiStatus"></p>
-                </div>
-
-                <!-- AI Results Section -->
-                <div class="ai-results hidden" id="aiResults">
-                    <label class="section-label">Choose a Text Style</label>
-                    
-                    <div class="ai-options" id="aiOptions">
-                        <!-- Option A: Professional -->
-                        <div class="ai-option" data-option="0">
-                            <div class="option-header">
-                                <span class="option-badge professional">A</span>
-                                <div class="option-info">
-                                    <h4>Professional</h4>
-                                    <p>Formal and authoritative tone</p>
-                                </div>
-                            </div>
-                            <div class="option-preview" id="optionPreview0">
-                                <!-- Preview text will be inserted here -->
-                            </div>
-                            <button class="btn btn-primary btn-use-option" data-option="0">
-                                Use This Option
-                            </button>
-                        </div>
-
-                        <!-- Option B: Engaging -->
-                        <div class="ai-option" data-option="1">
-                            <div class="option-header">
-                                <span class="option-badge engaging">B</span>
-                                <div class="option-info">
-                                    <h4>Engaging</h4>
-                                    <p>Dynamic and captivating tone</p>
-                                </div>
-                            </div>
-                            <div class="option-preview" id="optionPreview1">
-                                <!-- Preview text will be inserted here -->
-                            </div>
-                            <button class="btn btn-primary btn-use-option" data-option="1">
-                                Use This Option
-                            </button>
-                        </div>
-
-                        <!-- Option C: Concise -->
-                        <div class="ai-option" data-option="2">
-                            <div class="option-header">
-                                <span class="option-badge concise">C</span>
-                                <div class="option-info">
-                                    <h4>Concise</h4>
-                                    <p>Short and punchy tone</p>
-                                </div>
-                            </div>
-                            <div class="option-preview" id="optionPreview2">
-                                <!-- Preview text will be inserted here -->
-                            </div>
-                            <button class="btn btn-primary btn-use-option" data-option="2">
-                                Use This Option
-                            </button>
-                        </div>
+                <div class="uploaded-files-list" id="uploadedFilesList"></div>
+                <div class="ai-actions"><button class="btn btn-secondary btn-large" id="generateTextBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Generate Text Options</button></div>
+                <div class="ai-status-bar" id="aiStatusBar"><div class="status-content"><div class="spinner"></div><span id="aiStatusText">Ready to generate</span></div></div>
+                <div class="ai-results hidden" id="aiTextResults">
+                    <h3>Choose Your Style</h3>
+                    <div class="ai-options-grid">
+                        <div class="ai-option-card"><div class="option-header"><div class="option-icon professional">A</div><div class="option-title"><h4>Professional</h4><span>Formal & authoritative</span></div></div><div class="option-preview" id="textOptionPreview0"></div><button class="btn btn-primary btn-full" data-use-option="0">Use This Style</button></div>
+                        <div class="ai-option-card"><div class="option-header"><div class="option-icon engaging">B</div><div class="option-title"><h4>Engaging</h4><span>Dynamic & captivating</span></div></div><div class="option-preview" id="textOptionPreview1"></div><button class="btn btn-primary btn-full" data-use-option="1">Use This Style</button></div>
+                        <div class="ai-option-card"><div class="option-header"><div class="option-icon concise">C</div><div class="option-title"><h4>Concise</h4><span>Short & punchy</span></div></div><div class="option-preview" id="textOptionPreview2"></div><button class="btn btn-primary btn-full" data-use-option="2">Use This Style</button></div>
                     </div>
                 </div>
             </section>
 
-            <!-- Slide Content Panel -->
-            <section class="panel slides-panel" id="slidesPanel">
-                <div class="panel-header">
-                    <span class="panel-number">03</span>
-                    <h2>Slide Content</h2>
-                </div>
-                
-                <div class="slides-container" id="slidesContainer">
-                    <!-- Slides will be dynamically generated -->
+            <!-- Slides -->
+            <section class="content-section" id="slides">
+                <div class="section-header"><span class="section-number">03</span><div><h2>Slide Editor</h2><p>Customize each slide's content and background</p></div></div>
+                <div class="slides-editor" id="slidesEditor"></div>
+            </section>
+
+            <!-- Preview -->
+            <section class="content-section" id="preview">
+                <div class="section-header"><span class="section-number">04</span><div><h2>Preview & Export</h2><p>Review your carousel and share it with the world</p></div></div>
+                <div class="preview-layout">
+                    <div class="preview-carousel-wrapper">
+                        <div class="carousel-phone-frame">
+                            <div class="phone-notch"></div>
+                            <div class="carousel-container" id="carouselContainer"><div class="carousel-track" id="carouselTrack"></div></div>
+                            <div class="carousel-controls">
+                                <button class="carousel-nav prev" id="carouselPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+                                <div class="carousel-dots" id="carouselDots"></div>
+                                <button class="carousel-nav next" id="carouselNext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preview-actions">
+                        <div class="action-card"><h3>Generate</h3><button class="btn btn-primary btn-large btn-full" id="generateCarouselBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Generate Carousel</button></div>
+                        <div class="action-card"><h3>Download</h3><button class="btn btn-secondary btn-full" id="downloadAllBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download All</button><div class="individual-downloads" id="individualDownloads"></div></div>
+                        <div class="action-card"><h3>Publish</h3><div class="button-stack"><button class="btn btn-instagram btn-full" id="postNowBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg>Post Now</button><button class="btn btn-secondary btn-full" id="schedulePostBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Schedule Post</button></div></div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Generate Button -->
-            <div class="generate-section">
-                <button class="btn btn-primary btn-generate" id="generateBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                    </svg>
-                    Generate Carousel
-                </button>
-            </div>
-
-            <!-- Preview Panel -->
-            <section class="panel preview-panel hidden" id="previewPanel">
-                <div class="panel-header">
-                    <span class="panel-number">04</span>
-                    <h2>Preview</h2>
-                </div>
-                
-                <div class="carousel-wrapper">
-                    <div class="carousel-container" id="carouselContainer">
-                        <div class="carousel-track" id="carouselTrack">
-                            <!-- Slides will be inserted here -->
-                        </div>
+            <!-- About -->
+            <section class="content-section about-section" id="about">
+                <div class="section-header"><span class="section-number">05</span><div><h2>About Us</h2><p>Learn more about GF Innovative Solutions</p></div></div>
+                <div class="about-content">
+                    <div class="about-card main-about">
+                        <div class="about-logo"><div class="about-logo-icon">GF</div></div>
+                        <h3>GF Innovative Solutions</h3>
+                        <p class="about-tagline">Your Partner in Digital Transformation</p>
+                        <p class="about-description">GF Innovative Solutions is a technology consultancy based in Stuttgart, Germany. We specialize in AI transformation, helping businesses leverage cutting-edge artificial intelligence to streamline processes, enhance productivity, and drive innovation.</p>
+                        <p class="about-description">Our team of experts combines deep technical knowledge with practical business understanding to deliver solutions that make a real difference.</p>
                     </div>
-                    
-                    <button class="carousel-nav carousel-nav-prev" id="carouselPrev">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="15 18 9 12 15 6"/>
-                        </svg>
-                    </button>
-                    
-                    <button class="carousel-nav carousel-nav-next" id="carouselNext">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="9 18 15 12 9 6"/>
-                        </svg>
-                    </button>
-                    
-                    <div class="carousel-dots" id="carouselDots">
-                        <!-- Dots will be inserted here -->
+                    <div class="about-cards-row">
+                        <div class="about-card"><div class="about-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><h4>Location</h4><p>Stuttgart, Germany</p></div>
+                        <div class="about-card"><div class="about-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><h4>Contact</h4><a href="mailto:info@gfinnov.com" class="about-email">info@gfinnov.com</a></div>
+                        <div class="about-card"><div class="about-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><h4>Need Help?</h4><p>Questions? Send us an email!</p></div>
                     </div>
                 </div>
-
-                <!-- Export Section -->
-                <div class="export-section">
-                    <div class="export-buttons">
-                        <button class="btn btn-secondary" id="downloadAllBtn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                                <polyline points="7 10 12 15 17 10"/>
-                                <line x1="12" y1="15" x2="12" y2="3"/>
-                            </svg>
-                            Download All (ZIP)
-                        </button>
-                        <button class="btn btn-instagram" id="postBtn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="2" y="2" width="20" height="20" rx="5"/>
-                                <circle cx="12" cy="12" r="4"/>
-                                <circle cx="18" cy="6" r="1.5" fill="currentColor"/>
-                            </svg>
-                            Post to Instagram
-                        </button>
-                    </div>
-                    
-                    <div class="individual-downloads" id="individualDownloads">
-                        <!-- Individual download buttons will be inserted here -->
-                    </div>
-                </div>
+                <footer class="app-footer"><p>© 2025 GF Innovative Solutions. Made with German precision.</p><p class="footer-specs">Carousel images: 1080 × 1350px • Instagram-ready</p></footer>
             </section>
         </main>
-
-        <!-- Footer -->
-        <footer class="app-footer">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <span class="footer-logo">GF</span>
-                    <span>GF Innovative Solutions</span>
-                </div>
-                <p>Made with German precision — 1080 × 1350px Instagram-ready images</p>
-            </div>
-        </footer>
     </div>
 
-    <!-- Configuration Modal -->
+    <!-- Config Modal -->
     <div class="modal-overlay hidden" id="configModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3>Configuration</h3>
-                <button class="modal-close" id="configModalClose">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </button>
-            </div>
+        <div class="modal modal-large">
+            <div class="modal-header"><h3>Configuration</h3><button class="modal-close" id="configModalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
             <div class="modal-body">
-                <div class="config-group">
-                    <label for="webhookUrl">AI Webhook URL</label>
-                    <input type="url" id="webhookUrl" placeholder="https://your-n8n-instance.com/webhook/...">
-                    <p class="config-hint">Enter your n8n webhook URL for AI text generation</p>
-                </div>
+                <p class="modal-description">Configure your webhook URLs to enable AI-powered features.</p>
+                <div class="config-group"><div class="config-group-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><div><label>AI Text Generation</label><span>Generate carousel text from your content</span></div></div><input type="url" id="webhookTextUrl" placeholder="https://your-n8n.com/webhook/text-generator"></div>
+                <div class="config-group"><div class="config-group-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div><label>AI Image Generation</label><span>Generate background images with AI</span></div></div><input type="url" id="webhookImageUrl" placeholder="https://your-n8n.com/webhook/image-generator"></div>
+                <div class="config-group"><div class="config-group-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><label>Post Scheduler</label><span>Schedule and post to Instagram</span></div></div><input type="url" id="webhookScheduleUrl" placeholder="https://your-n8n.com/webhook/schedule-post"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="configModalCancel">Cancel</button>
-                <button class="btn btn-primary" id="configModalSave">Save Configuration</button>
-            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" id="configModalCancel">Cancel</button><button class="btn btn-primary" id="configModalSave">Save Configuration</button></div>
         </div>
     </div>
 
-    <!-- Hidden canvas container for generation -->
-    <div id="canvasContainer" style="display: none;"></div>
+    <!-- Schedule Modal -->
+    <div class="modal-overlay hidden" id="scheduleModal">
+        <div class="modal">
+            <div class="modal-header"><h3>Schedule Post</h3><button class="modal-close" id="scheduleModalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Date</label><input type="date" id="scheduleDate"></div>
+                <div class="form-group"><label>Time</label><input type="time" id="scheduleTime"></div>
+                <div class="form-group"><label>Caption (optional)</label><textarea id="scheduleCaption" rows="4" placeholder="Write your Instagram caption..."></textarea></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" id="scheduleModalCancel">Cancel</button><button class="btn btn-primary" id="scheduleModalConfirm">Schedule</button></div>
+        </div>
+    </div>
 
-    <!-- Scripts -->
+    <!-- AI Image Modal -->
+    <div class="modal-overlay hidden" id="aiImageModal">
+        <div class="modal modal-large">
+            <div class="modal-header"><h3>Choose AI Generated Image</h3><button class="modal-close" id="aiImageModalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+            <div class="modal-body">
+                <p class="modal-description">Select an image for <span id="aiImageSlideNumber">Slide 1</span></p>
+                <div class="ai-image-grid" id="aiImageGrid">
+                    <div class="ai-image-option" data-image="0"><div class="image-placeholder"><div class="spinner"></div></div></div>
+                    <div class="ai-image-option" data-image="1"><div class="image-placeholder"><div class="spinner"></div></div></div>
+                    <div class="ai-image-option" data-image="2"><div class="image-placeholder"><div class="spinner"></div></div></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" id="aiImageModalCancel">Cancel</button><button class="btn btn-primary" id="aiImageModalConfirm" disabled>Use Selected Image</button></div>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div id="canvasContainer" style="display:none;"></div>
+
     <script src="js/canvas.js"></script>
-    <script src="js/ui.js"></script>
     <script src="js/carousel.js"></script>
     <script src="js/ai-generator.js"></script>
+    <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

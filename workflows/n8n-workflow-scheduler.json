@@ -1,0 +1,124 @@
+{
+  "name": "GF Carousel - Post Scheduler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "carousel-schedule-post",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nlet body = input.body || input;\nif (typeof body === 'string') body = JSON.parse(body);\n\nconst images = body.images || [];\nconst caption = body.caption || '';\nconst scheduledTime = body.scheduledTime;\nconst postNow = body.postNow || false;\nconst metadata = body.metadata || {};\n\nconst postId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;\n\nreturn {\n  json: {\n    postId,\n    images,\n    caption,\n    scheduledTime,\n    postNow,\n    metadata,\n    createdAt: new Date().toISOString(),\n    status: postNow ? 'posting' : 'scheduled'\n  }\n};"
+      },
+      "id": "parse-input",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [{ "value1": "={{ $json.postNow }}", "value2": true }]
+        }
+      },
+      "id": "check-post-now",
+      "name": "Post Now?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "folderId": { "__rl": true, "mode": "list", "value": "" },
+        "name": "={{ 'carousel_' + $json.postId + '.json' }}",
+        "driveId": { "__rl": true, "mode": "list", "value": "My Drive" },
+        "options": {}
+      },
+      "id": "save-to-drive",
+      "name": "Save to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [900, 400],
+      "credentials": { "googleDriveOAuth2Api": { "id": "YOUR_CREDENTIALS", "name": "Google Drive" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// Create JSON content for the scheduled post\nconst postData = {\n  postId: data.postId,\n  images: data.images,\n  caption: data.caption,\n  scheduledTime: data.scheduledTime,\n  status: 'scheduled',\n  createdAt: data.createdAt,\n  metadata: data.metadata\n};\n\n// Convert to binary for Google Drive upload\nconst jsonContent = JSON.stringify(postData, null, 2);\nconst base64 = Buffer.from(jsonContent).toString('base64');\n\nreturn {\n  json: data,\n  binary: {\n    data: {\n      data: base64,\n      mimeType: 'application/json',\n      fileName: `carousel_${data.postId}.json`\n    }\n  }\n};"
+      },
+      "id": "prepare-file",
+      "name": "Prepare File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulate posting to Instagram\n// In production, integrate with Instagram Graph API\nconst data = $input.first().json;\n\nconsole.log('Posting to Instagram:', data.postId);\nconsole.log('Images:', data.images.length);\nconsole.log('Caption:', data.caption);\n\n// Return success response\nreturn {\n  json: {\n    success: true,\n    postId: data.postId,\n    status: 'posted',\n    message: 'Successfully posted to Instagram',\n    postedAt: new Date().toISOString()\n  }\n};"
+      },
+      "id": "post-instagram",
+      "name": "Post to Instagram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nreturn {\n  json: {\n    success: true,\n    postId: data.postId,\n    status: 'scheduled',\n    scheduledTime: data.scheduledTime,\n    message: `Post scheduled for ${data.scheduledTime}`,\n    driveFileId: data.id || null\n  }\n};"
+      },
+      "id": "schedule-response",
+      "name": "Schedule Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }] } }
+      },
+      "id": "respond-post",
+      "name": "Respond (Posted)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": { "responseHeaders": { "entries": [{ "name": "Access-Control-Allow-Origin", "value": "*" }] } }
+      },
+      "id": "respond-scheduled",
+      "name": "Respond (Scheduled)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1340, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "Parse Input", "type": "main", "index": 0 }]] },
+    "Parse Input": { "main": [[{ "node": "Check Post Now?", "type": "main", "index": 0 }]] },
+    "Check Post Now?": {
+      "main": [
+        [{ "node": "Post to Instagram", "type": "main", "index": 0 }],
+        [{ "node": "Prepare File", "type": "main", "index": 0 }]
+      ]
+    },
+    "Post to Instagram": { "main": [[{ "node": "Respond (Posted)", "type": "main", "index": 0 }]] },
+    "Prepare File": { "main": [[{ "node": "Save to Google Drive", "type": "main", "index": 0 }]] },
+    "Save to Google Drive": { "main": [[{ "node": "Schedule Response", "type": "main", "index": 0 }]] },
+    "Schedule Response": { "main": [[{ "node": "Respond (Scheduled)", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
